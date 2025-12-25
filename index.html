@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOW YOU KNOW ME 🇰🇪</title>
+    <style>
+        /* Modern 2025 Kenyan Aesthetics */
+        :root {
+            --ke-green: #006600; --ke-red: #BB0000; --ke-black: #000000;
+        }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: #0f0f0f; color: white; }
+        
+        /* Realistic Floating Background */
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
+
+        .container {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px);
+            padding: 40px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 90%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        h1 { color: var(--ke-red); text-transform: uppercase; letter-spacing: 2px; }
+        input { width: 80%; padding: 12px; margin: 20px 0; border-radius: 8px; border: none; font-size: 1rem; }
+        .btn { 
+            background: var(--ke-green); color: white; border: none; padding: 12px 30px; 
+            border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; width: 100%;
+        }
+        .btn:hover { background: #004d00; transform: translateY(-3px); }
+        .ig-tag { margin-top: 20px; font-size: 0.8rem; color: #aaa; }
+        .ig-tag a { color: #e1306c; text-decoration: none; font-weight: bold; }
+
+        #quiz-section, #result-section { display: none; }
+        .option-btn { background: rgba(255,255,255,0.1); border: 1px solid #444; color: white; display: block; width: 100%; margin: 10px 0; padding: 12px; border-radius: 8px; cursor: pointer; }
+        .option-btn:hover { background: var(--ke-red); }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Step 1: Name Input -->
+    <div id="start-section" class="container">
+        <h1>HOW YOU KNOW ME</h1>
+        <p>Prove you're a real one 🇰🇪</p>
+        <input type="text" id="user-name" placeholder="Enter your name..." required>
+        <button class="btn" onclick="startQuiz()">Start Challenge</button>
+        <p class="ig-tag">Created by <a href="instagram.com" target="_blank">@its_patrick_98</a></p>
+    </div>
+
+    <!-- Step 2: Quiz -->
+    <div id="quiz-section" class="container">
+        <h2 id="q-text">Question</h2>
+        <div id="options"></div>
+    </div>
+
+    <!-- Step 3: Result -->
+    <div id="result-section" class="container">
+        <h2 id="final-msg">Well done!</h2>
+        <p id="score-text"></p>
+        <button class="btn" onclick="location.reload()">Try Again</button>
+    </div>
+
+    <script>
+        // Floating Objects Logic
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 5 + 2;
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 - 1;
+                this.color = ['#006600', '#BB0000', '#FFFFFF'][Math.floor(Math.random() * 3)];
+            }
+            update() {
+                this.x += this.speedX; this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        for(let i=0; i<60; i++) particles.push(new Particle());
+        function animate() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Quiz Logic
+        let userName = "";
+        let score = 0;
+        let currentQ = 0;
+        const questions = [
+            { q: "What's my 'form' on a Friday night?", a: ["Kulala mapema", "Sherehe", "Kazi tu", "Networking"], c: 1 },
+            { q: "My favorite kibandaski meal?", a: ["Chapati Madondo", "Ugali Managu", "Githeri", "Smokie Pasua"], c: 0 },
+            { q: "If I say 'Tuma na ya kutoa', what do I mean?", a: ["Send rent", "Include withdrawal fees", "I'm broke", "Send gift"], c: 1 }
+        ];
+
+        function startQuiz() {
+            userName = document.getElementById('user-name').value;
+            if(!userName) return alert("Weka jina kwanza!");
+            document.getElementById('start-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if(currentQ >= questions.length) return showResults();
+            const q = questions[currentQ];
+            document.getElementById('q-text').innerText = q.q;
+            const optBox = document.getElementById('options');
+            optBox.innerHTML = '';
+            q.a.forEach((opt, i) => {
+                const b = document.createElement('button');
+                b.className = 'option-btn';
+                b.innerText = opt;
+                b.onclick = () => { if(i === q.c) score++; currentQ++; showQuestion(); };
+                optBox.appendChild(b);
+            });
+        }
+
+        function showResults() {
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+            document.getElementById('score-text').innerText = `${userName}, you got ${score}/${questions.length} right!`;
+        }
+    </script>
+</body>
+</html>
